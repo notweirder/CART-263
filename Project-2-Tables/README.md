@@ -1,6 +1,6 @@
 # Data Visualization
 
-![Data Visualization Screenshot]([images/Project2.png](https://media.discordapp.net/attachments/969352530658230302/1084019466460995685/image.png?width=2244&height=1160))
+![Data Visualization Screenshot](https://media.discordapp.net/attachments/969352530658230302/1084019466460995685/image.png?width=2244&height=1160)
 
 ## Project Goal
 
