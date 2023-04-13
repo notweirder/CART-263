@@ -1,36 +1,62 @@
-let submitCardButton;
 let selectedCard;
-const deckSize = 3;
+let handSize = 3;
 let deck = [];
+let cardsDealt = [];
+let hand = [];
 
-let deckGridPoints = [];
+let a = [];
 
-let p1;
 
-let e1;
+
+let player1;
+let player2;
+let enemy1;
 
 let gameStart = false;
-let isRoundSetUp = false;
-
 let isRoundOver = false;
 
-let b1;
-
 let enemyNum = 1;
+let floorNum = 1;
 
+
+let table;
+
+let enemyAttackAnimationStart = false;
+let playerAttackAnimationStart = false;
+
+
+
+let enemyAttackAnimationStartDelay;
+let playerAttackAnimationStartDelay 
+let endOfRoundDelay;
+
+let submitCardButton;
+
+
+let errorList = [1]
+
+function preload()
+{
+  table = loadTable("Cards .csv", "csv", "header");
+}
 
 function setup() {
-	 selectedCard = new Card(0,0,0,0,0);
-	createCanvas(windowWidth, windowHeight);
 
-  p1 = new Player();
-  e1 = new Enemy();
-submitCardButton = createButton('submit card')
-submitCardButton.size(100,100)
-submitCardButton.position(width/2-50,650)
-submitCardButton.mousePressed(submitCard)
 
-  
+  enemyAttackAnimationStartDelay = new Timer(2000);
+  playerAttackAnimationStartDelay = new Timer(200);
+  endOfRoundDelay = new Timer (3200)
+
+  img = loadImage("assets/images/E1.png");
+  img2 = loadImage("assets/images/P1.png");
+
+  selectedCard = new Card(0, 0, 0, 0, 0);
+  createCanvas(windowWidth, windowHeight);
+
+  player1 = new Player();
+  enemy1 = new Enemy();
+  submitCardButton = new Button(width/2-50,400,100,submitCard)
+
   textAlign(CENTER);
   rectMode(CENTER);
   // Normal program setup goes here
@@ -40,294 +66,475 @@ submitCardButton.mousePressed(submitCard)
 
 function draw() {
   if (isConnected) {
-    if (!gameStart)
-    {
-      background(255)
-      fill(0)
-      textSize(30)
-      textAlign(CENTER)
-      text('game ends when one of your bars is half the size of the other',width/2,100)
-      text('after you attack the enemy will attack back',width/2,150)
-      text('NOTE: THIS IS A ROUGH DEMO',width/2,250)
-      text('CARDS, ENEMIES, ETC. ARE ALL TEMPORARY',width/2,300)
-
-      text('click to start',width/2,height/2)
-
+    if (isgameOver(player1) == true) {
+      displayGameOver();
     }
     else {
-    if (isgameOver(p1) == true)
-    {
-      background(255)
-      textAlign(CENTER)
-      fill('red')
-      textSize(75)
-    text('game over!', width/2,height/2)
-    textSize(30)
-    text('refresh browser!', width/2,100)
+      background(50);
+      for (let i = 0; i < 3; i++) {
+        rectMode(CENTER);
+        selectCard(hand[i]);
 
-
+        hand[i].hoverOver();
+  
+        hand[i].display();
+        hand[i].slideTo(200*i+500,700)
+        noStroke();
+      }
     }
-    else 
-    {
-      textSize(30)
-    background(50);
-    textAlign(CORNER)
-    fill(255)
-    text('enemy health',width-600,40)
-    text('click to select card',width/2-150,300)
+      submitCardButton.display()
 
-    for (let i = 0; i < deckSize; i++) {	
-	selectCard(deck[i]);	
-	deck[i].slideTo(deckGridPoints[i]+350, 500);
-	  deck[i].hoverOver();
-      deck[i].display();
-	noStroke()
-    }
-    p1.display();
-	e1.display();
-  }
-  rectMode(CENTER);
-  if (isRoundOver == true)
-	{
-	}
-  isRoundOver == false;
-  console.log(isRoundOver)
-}
+      player1.display();
+      enemy1.playAnimation();
+      enemy1.display();
+      player1.playAnimation();
+
+      endOfRound();
+
   }
 }
-function changeBG() {
-  let val = random(255);
-  background(val);
-}
+
+
 function populateDeck() {
-  for (let i = 0; i < deckSize; i++) {
-    deck.push(new Card(0, 0, (i + 1)* 10, i));
-    deckGridPoints.push(
-      deck[i].width  + deck[0].width * i
-    )
+  for (let r = 0; r < table.getRowCount(); r++) {
+    deck[r] = new Card(width, height-200, parseInt(table.getString(r, 3)),table.getString(r, 2),table.getString(r, 4),table.getString(r, 5),table.getString(r, 6));
+    deck = shuffle(deck, true);
+
   }
+      hand[0] = Object.create(deck[int(random(7))])
+      hand[1] = Object.create(deck[int(random(7))])
+      hand[2] = Object.create(deck[int(random(7))])
+
+  updateHand();
 }
+
+function updateHand() {
+
+
+      if (selectedCard == hand[0])
+      {
+        console.log('yes')
+        hand[0] = Object.create(hand[1]);
+        hand[1] = Object.create(hand[2]);
+        hand[2] = Object.create(deck[int(random(7))])
+      }
+      if (selectedCard == hand[1])
+      {
+        console.log('yes')
+        hand[0] = Object.create(hand[0])
+        hand[1] = Object.create(hand[2])
+        hand[2] = Object.create(deck[int(random(3))])
+
+      }
+       if (selectedCard == hand[2])
+      {
+        hand[2] = Object.create(deck[int(random(3))])
+      }
+
+       console.log(hand[0].value)
+       console.log(hand[1].value)
+       console.log(hand[2].value)
+
+    // if (hand[i] == selectedCard)
+    // {
+    //   hand[i] = deck[int(random(deck.length))]
+    //   for (let j = 0; j < deck.length; j++)
+    //   {
+    //     if (hand[i] == cardsDealt[j])
+    //     hand[i] = deck[int(random(deck.length))]
+    //   }
+    // }
+    // else {
+    //   hand[i] = deck[i]
+    // }
+    // console.log(hand[i])
+  }
+
 
 class Card {
-  constructor(xLocation, yLocation, value, position, type) {
-	this.xOriginal = xLocation
-	this.yOriginal = yLocation
-
-
-    this.pos = position;
+  constructor(xLocation, yLocation, value, type, target, playerOrEnemy, ID) {
+    
     this.x = xLocation;
     this.y = yLocation;
-	
-	this.target = yLocation -200;
 
     this.width = 200;
     this.height = 280;
     this.value = value;
 
-    this.fontSize = (150) / this.value.toString().length;
+    this.fontSize = 150 / this.value.toString().length;
 
-	this.isHoveredOver = false;
+    this.isHoveredOver = false;
 
-	
+    this.type = type;
+
+    this.target = target;
+
+    this.playerOrEnemy = playerOrEnemy;
+
+    this.ID = ID;
+
+    this.colors = ["#ff8c8c", "#fff873", "#ededed", "#363636"];
 
   }
   //lerps from one x+y value to another
-  	slideTo(x1, y1) {
+  slideTo(x1, y1) {
     this.x = Math.ceil(lerp(this.x, x1, 0.05));
     this.y = Math.ceil(lerp(this.y, y1, 0.05));
-	this.xOriginal = this.x;
-	this.yOriginal = this.y;
   }
 
   hoverOver() {
     if (
-      mouseX > this.xOriginal - (this.width) / 2 &&
-      mouseX <= this.xOriginal + (this.width) / 2 &&
-      mouseY > this.yOriginal - (this.height) / 2 &&
-      mouseY < this.yOriginal + (this.height) / 2
+      mouseX > this.x - this.width / 2 &&
+      mouseX <= this.x + this.width / 2 &&
+      mouseY > this.y - this.height / 2 &&
+      mouseY < this.y + this.height / 2
     ) {
-		strokeWeight(3)
-		stroke(0)
-		this.isHoveredOver = true;
-		//this.y = lerp(this.y,this.target,0.10)	
-		//sendMQTTMessage("0" + "/" + this.pos + "/" + this.y);
-	}
-	else{
-		this.isHoveredOver = false;
-	}
+      stroke(0);
+      this.isHoveredOver = true;
+      //this.y = lerp(this.y,this.target,0.10)
+      //sendMQTTMessage("0" + "/" + this.pos + "/" + this.y);
+    } else {
+      this.isHoveredOver = false;
+    }
   }
 
   //displays the card
   display() {
-	if (this.value == selectedCard.value)
-	{
-		fill('#ebf2ff')	
-	}
-	else{
-		fill(255);
-	}
+    rectMode(CENTER);
     textAlign(CENTER);
-	if (this.isHoveredOver == true)
-	{
-	rect(this.x, this.y, this.width*1.2, this.height*1.2, 20);
-	}
-	else
-	{
-		rect(this.x, this.y, this.width, this.height, 20);
-	}
+    stroke(0)
+    // if (this.ID == selectedCard.ID)
+    // {
+    //  strokeWeight(5)
+    // }
+
+    for (let i = 0; i < this.colors.length; i++)
+    {
+      if (this.target == i)
+      {
+        fill(this.colors[i])
+      }
+   }
+   
+    if (this.isHoveredOver == true) {
+      //larger if hovered over
+      rect(this.x, this.y, this.width * 1.2, this.height * 1.2, 20);
+    } else {
+      //regular sized card
+     rect(this.x, this.y, this.width, this.height, 20);
+    }
+
+    textFont("Caveat")
     fill(0);
-    textSize(this.fontSize/1.5);
-    text('DMG', this.x, this.y-100 + this.fontSize / 4);
+    textSize(this.fontSize / 1.5);
+    if (this.playerOrEnemy == "player")
+    {
+      text("player", this.x, this.y - 200 + this.fontSize / 4);
+    }
+     if (this.playerOrEnemy == "enemy")
+    {
+      text("enemy", this.x, this.y - 200 + this.fontSize / 4);
+    }
+
+    if (this.type == "ATK")
+    {
+      text("LOWER", this.x, this.y - 100 + this.fontSize / 4);
+    }
+    else if (this.type == "HL")
+    {
+      text("RAISE", this.x, this.y - 100 + this.fontSize / 4);
+    }
+
     textSize(this.fontSize);
     text(this.value, this.x, this.y + this.fontSize / 4);
     textAlign(LEFT);
-	noStroke();
+    noStroke();
   }
 
   //displays the "backside" of the card
-  cardFlip() {
-    let movePatternDown = 20;
-    //print(this.number, "hidden")
-    fill(204, 22, 22);
-    rect(this.x, this.y, this.width, this.height, 20);
-    fill(186, 13, 13);
-    beginShape();
-    vertex(this.x, this.y + this.height - 250 + movePatternDown);
-    vertex(this.x - 100, this.y + this.height - 300 + movePatternDown);
-    vertex(this.x, this.y + this.height - 350 + movePatternDown);
-    vertex(this.x + 100, this.y + this.height - 300 + movePatternDown);
-    vertex(this.x, this.y + this.height - 250 + movePatternDown);
-    endShape();
-    beginShape();
-    vertex(this.x, this.y + this.height - 250 + movePatternDown);
-    vertex(this.x - 100, this.y + this.height - 175 + movePatternDown);
-    vertex(this.x + 100, this.y + this.height - 175 + movePatternDown);
-    vertex(this.x, this.y + this.height - 250 + movePatternDown);
-    endShape();
-    beginShape();
-    vertex(this.x, this.y + this.height - 350 + movePatternDown);
-    vertex(this.x - 100, this.y + this.height - 425 + movePatternDown);
-    vertex(this.x + 100, this.y + this.height - 425 + movePatternDown);
-    vertex(this.x, this.y + this.height - 350 + movePatternDown);
-    endShape();
-  }
+  cardFlip() {}
 }
 
 class Player {
   constructor() {
-	this.x = 200;
-	this.y = 400;
-    this.fire = 100;
-    this.air = 100;
-    this.water = 100;
-    this.earth = 100;
+    this.x = 100;
+    this.y = 300;
+    this.xOriginal = 100;
+    this.yOriginal = 300;
+
+    this.colors = ["red", "yellow", "white", "black"];
+    this.humors = [50, 50, 50, 50];
+
+    this.state1 = false;
+    this.moveSpeed = 1;
   }
   display() {
     rectMode(CORNER);
     fill(255);
-    rect(this.x, this.y, this.x, 300);
-    fill("yellow");
-    rect(this.x, this.y -125*2, 50, this.fire*2);
-    fill("red");
-    rect(this.x+50, this.y -125*2 , 50, this.air*2);
-    fill("blue");
-    rect(this.x+100, this.y -125*2, 50, this.water*2);
-    fill("black");
-    rect(this.x+150, this.y -125*2 , 50, this.earth*2);
+    image(img2, this.x, this.y, 200 * 1.5, 300 * 1.5);
+    for (let i = 0; i < this.humors.length; i++) {
+
+      //outlined rectangles
+      noFill();
+      stroke(0);
+      strokeWeight(1);
+      //uses a quadtratic formula to make the arc shape
+      rect((i + 1) * 100 - 25, 20 * Math.pow(i + 1 - 2.5, 2) + 25, 50, 100 * 2);
+      
+      //filled rectangles
+      noStroke();
+      //fills each rectangle a different color based on the colors array
+      fill(this.colors[i]);
+      //uses the sames quadtratic formula to make the arc shape
+      rect(
+        (i + 1) * 100 - 25,
+        20 * Math.pow(i + 1 - 2.5, 2) + 25,
+        50,
+        this.humors[i] * 2
+      );
+    }
   }
+  playAnimation()
+  {
+    if (playerAttackAnimationStart && playerAttackAnimationStartDelay.expired())
+    {
+      if (this.state1 == false)
+      {
+      this.moveSpeed+= 0.5
+      this.x += this.moveSpeed;
+      }
+      if (this.x >= this.xOriginal+100)
+      {
+        this.state1 = true;
+        this.moveSpeed = 1;
+      }
+      if (this.state1 == true)
+      {
+        this.moveSpeed+= 0.05
+        this.x -= this.moveSpeed;
+      }
+      if (this.state1 == true && this.x <= this.xOriginal)
+      {
+        this.state1 = false;
+        playerAttackAnimationStart = false
+        this.x = this.xOriginal;
+        playerAttack(enemy1)
+      }
+      }
+}
 }
 
 class Enemy {
-	constructor() {
-		this.x = 1100;
-		this.y = 200;
-		this.health = 100;
-	  }
-	  display() {
-		rectMode(CORNER);
-		fill(0);
-		rect(this.x, this.y, 300, 500);
-    fill(255)
-    text('Enemy',this.x+35,this.y+100)
-    text(enemyNum,this.x+125,this.y+200)
+  constructor() {
+    this.x = 1100;
+    this.y = 275;
+    this.xOriginal = 1100;
+    this.yOriginal = 275;
+
+    this.colors = ["red", "yellow", "white", "black"];
+    this.humors = [50,50,50,50];
+    this.state1 = false;
+    this.moveSpeed = 1
+  }
+  display() {
+    rectMode(CORNER);
+    fill(0);
+    image(img, this.x, this.y, 300 * 1.2, 400 * 1.2);
+    for (let i = 0; i < this.humors.length; i++) {
+      noFill();
+      stroke(0);
+      strokeWeight(1);
+      rect(
+        (i + 1) * 100 + 1000,
+        20 * Math.pow(i + 1 - 2.5, 2) + 25,
+        50,
+        100 * 2
+      );
+      noStroke();
+      fill(this.colors[i]);
+      rect(
+        (i + 1) * 100 + 1000,
+        20 * Math.pow(i + 1 - 2.5, 2) + 25,
+        50,
+        this.humors[i] * 2
+      );
+    }
+  }
+  playAnimation()
+  {
+    if (enemyAttackAnimationStart && enemyAttackAnimationStartDelay.expired())
+    {
+      if (this.state1 == false)
+      {
+      this.moveSpeed+= 0.5
+      this.x -= this.moveSpeed;
+      }
+      if (this.x <= this.xOriginal-100)
+      {
+        this.state1 = true;
+        this.moveSpeed = 1;
+      }
+      if (this.state1 == true)
+      {
+        this.moveSpeed+= 0.05
+        this.x += this.moveSpeed;
+      }
+      if (this.state1 == true && this.x > this.xOriginal)
+      {
+        this.state1 = false;
+        enemyAttackAnimationStart = false
+        this.x = this.xOriginal
+        enemyAttack(player1)
+      }
+      }
+}
+}
+
+class Button 
+{
+  constructor(x,y,size,funct)
+  {
+    this.x = x;
+    this.y = y;
+    this.size = size;
+    this.function = funct;
     fill(0)
-		rect(this.x-200,50,500,50)
-		fill('red')
-		rect(this.x-200,50,this.health*5,50)
-	  }
-}
-
-
-function selectCard(card)
-{
-	if (card.isHoveredOver == true && mouseIsPressed)
-	{
-		selectedCard = card;
-	}
-}
-
-function submitCard()
-{
-  if (e1.health>0)
-  {
-    e1.health = e1.health - selectedCard.value;
-    enemyAttack(p1)
   }
-  if (e1.health<=0)
+  display()
   {
-    e1.health = 100;
+    rectMode(CORNER)
+    square(this.x,this.y,this.size)
+  }
+  runFunction()
+  {
+    this.function.call()
+  }
+
+}
+
+
+function selectCard(card) {
+  if (card.isHoveredOver && mouseIsPressed) {
+    selectedCard = card; 
+  }
+}
+
+// function updateDeck()
+// {
+//   function findSelectedCardIndex(value) 
+//     {
+//       return value === selectedCard
+//     }
+//   deck[deck.findIndex(findSelectedCardIndex)] = deck[int(random(deck.length-1))];
+//   for (i = 0; i < deck.length-1; i++)
+//   {
+//     if (deck[i] == -1)
+//     {
+//       deck[i] = deck[random(deck.length-1)]
+//     }
+// }
+
+//}
+
+function submitCard() {
+  cardsDealt.push(selectedCard)
+  enemyAttackAnimationStart = true;
+  playerAttackAnimationStart = true;
+  enemyAttackAnimationStartDelay.start();
+  playerAttackAnimationStartDelay.start();
+  endOfRoundDelay.start();
+
+}
+
+function playerAttack(enemy)
+{
+  if (selectedCard.playerOrEnemy == "enemy")
+  {
+if (enemy.humors[selectedCard.target] > 0 && selectedCard.type == "ATK" ) {
+    enemy.humors[selectedCard.target] -= selectedCard.value;
+  }
+  if (enemy.humors[selectedCard.target] < 100 && selectedCard.type == "HL") {
+    enemy.humors[selectedCard.target] += selectedCard.value;
+  }
+  else if (player1.humors[selectedCard.target] > 100)
+  {
+  }
+  }
+
+  if (selectedCard.playerOrEnemy == "player")
+  {
+if (player1.humors[selectedCard.target] > 0 && selectedCard.type == "ATK" ) {
+  player1.humors[selectedCard.target] -= selectedCard.value;
+  }
+  if (player1.humors[selectedCard.target] < 100 && selectedCard.type == "HL") {
+    player1.humors[selectedCard.target] += selectedCard.value;
+  }
+}
+
+  if (enemy1.humors[0] <= 0) {
     enemyNum++;
+    floorNum++;
   }
 }
 
-function enemyAttack(player)
-{
-  this.randomRoll = int(random(4))
-  if (this.randomRoll == 0)
-  {
-    player.fire -= int(random(20))
-  }
-  if (this.randomRoll == 1)
-  {
-    player.air -= int(random(20))
-  }  
-  if (this.randomRoll == 2)
-  {
-    player.water -= int(random(20))
-  }
-  if (this.randomRoll == 3)
-  {
-    player.earth -= int(random(20))
-  }
-
+function enemyAttack(player) {
+  let randomHumor = int(random(4));
+    player.humors[randomHumor] -= 10;
 }
 
-function isgameOver(player)
-{
-  if (player.fire>player.air*2||player.fire>player.water*2||player.fire>player.earth*2)
-  {
-    return true;
-  }
-  else if (player.earth>player.air*2||player.earth>player.water*2||player.earth>player.fire*2)
-  {
-    return true;
-  }
-  else if (player.air>player.earth*2||player.air>player.water*2||player.air>player.fire*2)
-  {
-    return true;
-  }
-  else if (player.water>player.air*2||player.water>player.earth*2||player.water>player.fire*2)
-  {
-    return true;
-  }
-  else
-  {
-    return false;
-  }
 
+function isgameOver(player) {
+  for (let i = 0; i < player.humors.length - 1; i++) {
+    for (let j = 0; j < player.humors.length - 1; j++) {
+      if (
+        player.humors[i] > player.humors[j + 1] * 2 ||
+        player.humors[i] * 2 < player.humors[j + 1]
+      ) {
+        return true;
+      } else {
+      }
+    }
+  }
 }
 
-function mousePressed()
-{
+function mousePressed() {
   gameStart = true;
+  if (
+    mouseX > submitCardButton.x &&
+    mouseX <= submitCardButton.x + submitCardButton.size &&
+    mouseY > submitCardButton.y &&
+    mouseY < submitCardButton.y + submitCardButton.size
+  ) {
+  submitCardButton.runFunction()
+  isRoundOver = true;
 }
+}
+function displayGameOver() {
+  background(255);
+  textAlign(CENTER);
+  fill("red");
+  textSize(75);
+  text("game over!", width / 2, height / 2 - 100);
+  textSize(30);
+  text("refresh browser!", width / 2, 100);
+}
+
+function endOfRound()
+{
+   if (isRoundOver)
+   {
+    //updateDeck();
+    updateHand();
+    isRoundOver = false;
+   }
+}
+
+function displayErrors ()
+{
+
+  if (errorHasMaxHealthAlready)
+  {
+
+  }
+}
+
