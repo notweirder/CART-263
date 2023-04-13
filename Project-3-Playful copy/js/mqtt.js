@@ -14,8 +14,8 @@ let cardSent;
 
 let isConnected = false;
 
-let myName = "p1";
-let nextName = "p2";
+let myName = "p2";
+let nextName = "p1";
 
 // MQTT client details. We are using a public server called shiftr.io. Don't change this.
 let broker = {

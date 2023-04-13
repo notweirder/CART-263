@@ -483,18 +483,18 @@ function selectCard(card) {
 function submitCard() {
   //  constructor(xLocation, yLocation, value, type, target, playerOrEnemy, ID) {
 
-  
-  
-  if (didPlayer1Submit && didPlayer2Submit)
-  {
+
+
   sendMQTTMessage('selectCard' + '/' + selectedCard.ID.toString())
+  cardsDealt.push(selectedCard)
   enemyAttackAnimationStart = true;
   playerAttackAnimationStart = true;
   playerAttackAnimationStartDelay.start();
   endOfRoundDelay.start();
+  didPlayer1Submit = false;
+  didPlayer2Submit = false;
 
 
-}
 }
 
 function playerAttack(enemy)
@@ -560,12 +560,6 @@ function mousePressed() {
     mouseY > submitCardButton.y &&
     mouseY < submitCardButton.y + submitCardButton.size
   ) {
-  
-    didPlayer1Submit = true;
-  
-  
-    didPlayer2Submit = true;
-  
   submitCardButton.runFunction()
   isRoundOver = true;
 }
@@ -597,7 +591,6 @@ function endOfRound()
     //updateDeck();
     updateHand();
     isRoundOver = false;
-
    }
 }
 
